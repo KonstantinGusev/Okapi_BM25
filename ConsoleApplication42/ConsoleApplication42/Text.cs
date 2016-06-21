@@ -17,6 +17,25 @@ namespace ConsoleApplication42
         public List<string> sentencesCollection;
         public List<string> wordsCollection;
         private double length;
+        public string result;
+
+        public void SecondPathProgramm()
+        {
+            var webClient = new WebClient();
+
+            webClient.Encoding = Encoding.GetEncoding(1251);
+            var textStart = webClient.DownloadString(
+                 "http://a-karenina.ru/files/book.txt");
+                    
+
+            foreach (var item in Rang(textStart).Take(10))
+            {
+                result += string.Format("{0} - {1}", item.Value, item.Importance) +Environment.NewLine;
+            }
+            Console.WriteLine(result);
+        }
+
+        
         //разбивка текста на предлoжения
         public List<string> Sentences(string text)
         {
@@ -27,8 +46,8 @@ namespace ConsoleApplication42
                    .OfType<Match>()
                    .Select(match => match.Value)
                    .ToList();
-            sentencesCollection = sentence;
-            return sentencesCollection;
+            
+            return sentence;
         }
 
         //разбика предложений на слова
@@ -45,8 +64,8 @@ namespace ConsoleApplication42
                 .GroupBy(s => s)
                 .Select(s => s.Key)
                 .ToList();
-            wordsCollection = words;
-            return wordsCollection;
+            ;
+            return words;
         }
 
         //рассчет idf
@@ -63,11 +82,19 @@ namespace ConsoleApplication42
             return result;
         }
 
-        public double CaclLeftPart(string word, string sentence)
+        public void CalculateLenght(string Text)
+        {
+            wordsCollection = Words(Text);
+            sentencesCollection = Sentences(Text);
+             length = Text.Length * 1.0 / this.sentencesCollection.Count;
+            
+        }
+
+        public double Formula(string word, string sentence)
         {
             double wordFrequency = FrequencyWordsSentence(word, sentence);
             int sentenceCount = Words(sentence).Count;
-
+            
             double result =
                 (wordFrequency * (2.0 + 1)) /
                 (wordFrequency + 2.0 * (1 - 0.75 + 0.75 * sentenceCount / length));
@@ -76,9 +103,9 @@ namespace ConsoleApplication42
         }
 
 
-        public List<string> Calculate()
+        public List<ValueResults> Calculate()
         {
-            List<string> result = new List<string>();
+            List<ValueResults> result = new List<ValueResults>();
 
             foreach (var sentence in sentencesCollection)
             {
@@ -86,11 +113,19 @@ namespace ConsoleApplication42
 
                 foreach (var word in this.wordsCollection)
                 {
-                    score += this.CaclLeftPart(word, sentence) * CalculateIDF(word);
+                    score += Formula(word, sentence) * CalculateIDF(word);
                 }
 
                 result.Add(new ValueResults(sentence, score));
             }
+
+            return result;
+        }
+
+        private IEnumerable<ValueResults> Rang(string Text)
+        {
+            this.CalculateLenght(Text);
+            var result = Sort(Calculate());
 
             return result;
         }
@@ -101,6 +136,7 @@ namespace ConsoleApplication42
                 .OrderByDescending(r => r.Importance)
                 .ToList();
         }
+
         //частота слов в предложении
         private double FrequencyWordsSentence(string word, string text)
         {

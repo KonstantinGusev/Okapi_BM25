@@ -15,14 +15,15 @@ namespace ConsoleApplication42
     public class ValueResults
     {
 
+        public ValueResults(string value, double importance)
+        { 
+            this.Value = value;
+            this.Importance = importance;
+        }
         public string Value { get; private set; }
 
         public double Importance { get; private set; }
 
-        public ValueResults(string value, double importance)
-        {
-            Value = value;
-            Importance = importance;
-        }
+
     }
 }
