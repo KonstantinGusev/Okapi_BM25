@@ -19,14 +19,14 @@ namespace ConsoleApplication144
     {
         static void Main(string[] args)
         {
-            ///Разделение "Войны и мира на предложения"
+            ///Разделение "Анна Каренина"
             /// 1- этап
             List<string> words = new List<string>();
             var webClient = new WebClient();
             
             webClient.Encoding = Encoding.GetEncoding(1251);
             var text = webClient.DownloadString(
-                "http://vojnaimir.ru/files/book1.txt");
+                "http://a-karenina.ru/files/book.txt");
 
             var regex = new Regex("[A-Z А-Я].*?(?=[.!?])");
             var sentence =
@@ -40,10 +40,11 @@ namespace ConsoleApplication144
             var list =
                 sentence
                 .OfType<Match>()
-                .Select(match => match.Value)
-                .Select(match => match.Trim())
-                .GroupBy(match => match)
-                .Select(match => match.Key)
+                .Select(m => m.Value)
+                .Select(m => m.Trim())
+                .Select(m => m.ToLower)
+                .GroupBy(m => m)
+                .Select(m => m.Key)
                 .ToList();
             //var list = sentence
             //        .GroupBy(s => s)
